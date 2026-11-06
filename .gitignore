@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# results: keep only the example figures (confusion matrices, ROC curves, lollipops)
+results/**
+!results/**/
+!results/**/confusion_matrix*.png
+!results/**/roc_curve*.png
+!results/**/lollipop*.png

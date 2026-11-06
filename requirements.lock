@@ -1,0 +1,15 @@
+# Exact versions used by the pipeline (Python 3.11 in the Docker image).
+numpy==2.0.2
+numba==0.60.0
+shap==0.48.0
+scipy==1.13.1
+scikit-learn==1.5.2
+xgboost==2.1.4
+pandas==2.2.3
+statsmodels==0.14.4
+seaborn==0.13.2
+matplotlib==3.9.2
+pydantic==2.9.2
+PyYAML==6.0.2
+pytest==8.3.3
+joblib==1.6.0

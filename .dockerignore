@@ -1,0 +1,10 @@
+.venv/
+results/
+data/
+__pycache__/
+*.pyc
+.pytest_cache/
+.git/
+prompt
+test_pipeline.csv
+params_xgb.yaml

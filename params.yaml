@@ -1,0 +1,83 @@
+# ============================================================================
+# params.yaml - configuration for the omics classification pipeline.
+#
+# Every key is documented below. Unknown keys are rejected (typos fail early).
+# Only `input`, `label_col`, `group0_name` and `group1_name` are required;
+# every other key falls back to the default shown in its comment.
+# Relative paths are resolved from the folder that contains this file.
+# ============================================================================
+
+# ===== GLOBAL =====
+seed: 42                        # Single global random seed (default: 42).
+                                # Used for the split, CV folds, models and sampling.
+outdir: results                 # Output folder; created if missing (default: results).
+
+# ===== INPUT =====
+input: data/example_test_dataset.csv   # REQUIRED. CSV with sample_id, group and numeric
+                                # features already in log2. No batch correction.
+id_col: sample_id               # Name of the sample identifier column (default: sample_id).
+label_col: group                # REQUIRED. Name of the label column. Allowed values: 0 and 1
+                                # (0 = control, 1 = target group).
+group0_name: Control            # REQUIRED. Text used in figures and tables for label 0.
+                                # Does not change any calculation.
+group1_name: Cancer             # REQUIRED. Text used in figures and tables for label 1.
+                                # Does not change any calculation.
+validation_input_data: data/example_validation_dataset.csv  # Optional external validation CSV, inside data/.
+                                # null = no validation data: the pipeline stops after saving the final model,
+                                # ready for later validation. If set, the same format as input is required
+                                # (sample_id, group with 0/1, and the features). Same id_col, label_col and
+                                # group names as above. Features the model uses that are missing = error;
+                                # extra features = ignored with a warning.
+data_type: omics                # Free text for titles and the report, e.g. proteomics,
+                                # microRNA, hemoglobin (default: omics).
+
+# ===== FIGURES =====
+colors:                         # Hex colors in #RRGGBB format. Each key is optional.
+  group0: "#1f77b4"             # Color for label 0 (control). Default: #1f77b4.
+                                # Used for the negative lollipop plot.
+  group1: "#d62728"             # Color for label 1 (target group). Default: #d62728.
+                                # Used for the positive lollipop plot.
+  plot_color: "#79c8b2"         # Color of the ROC curve. Default: #79c8b2.
+figure_formats: [png]           # List of: png, pdf, svg. Saved at 300 dpi. Default: [png].
+
+# ===== MODEL AND VALIDATION =====
+model: elasticnet               # elasticnet (logistic regression with elastic net) or xgboost (default: elasticnet).
+cv_folds: 5                     # Folds for hyperparameter search: 3, 5 or 10 (default: 5).
+test_size: 0.3                  # Fraction held out for testing, between 0.1 and 0.5.
+                                # 0.3 gives a 70/30 split, 0.2 gives 80/20 (default: 0.3).
+min_filled_percent: 50          # Percent, 0 to 100. A FEATURE is kept only if at least this
+                                # percent of its SAMPLES have a value (not missing).
+                                #   80 -> keep features filled in at least 80% of samples.
+                                #   70 -> keep features filled in at least 70% of samples.
+                                #   0  -> keep every feature that has at least one value.
+                                # Features with no values at all are always removed.
+                                # Recommended: 50 or higher (default: 50).
+                                # The filter uses all samples and never looks at the labels.
+n_jobs: -1                      # Parallel jobs for the search. -1 uses all cores
+                                # (default: -1). In containers, lower this if memory is tight.
+
+# ===== HYPERPARAMETERS (only the section for the chosen model is used) =====
+elasticnet:                     # GridSearchCV: tries EVERY combination of the lists below.
+  C: [0.001, 0.01, 0.1, 1, 10, 100]      # Inverse regularization strength (list).
+  l1_ratio: [0.1, 0.3, 0.5, 0.7, 0.9]    # Mix of L1 and L2 penalties, between 0 and 1 (list).
+  max_iter: 5000                # Fixed solver iterations, not searched (default: 5000).
+
+xgboost:                        # RandomizedSearchCV: samples n_iter combinations.
+  n_iter: 30                    # Number of sampled combinations. Capped at the size of the
+                                # search space, min(n_iter, number of combinations) (default: 30).
+  n_estimators: [100, 200, 300, 500]     # Number of boosting rounds (list).
+  max_depth: [2, 3, 4, 6]                # Maximum tree depth (list).
+  learning_rate: [0.01, 0.05, 0.1, 0.2]  # Shrinkage per round (list).
+  subsample: [0.6, 0.8, 1.0]             # Fraction of rows per tree, between 0 and 1 (list).
+  colsample_bytree: [0.4, 0.6, 0.8, 1.0] # Fraction of features per tree, between 0 and 1 (list).
+  min_child_weight: [1, 3, 5]            # Minimum sum of weights in a leaf (list).
+  reg_lambda: [1, 5, 10]                 # L2 regularization on leaf weights (list).
+
+# ===== SHAP (xgboost only) =====
+shap:
+  top_k: 10                     # Features shown in dependence plots. Uses min(top_k, number
+                                # of features) (default: 10).
+  compute_interactions: true    # Compute SHAP interaction values (default: true).
+  interaction_top_k: 15         # Maximum number of features in the interaction heatmap.
+                                # If fewer than 3 are available, the heatmap is skipped
+                                # (default: 15).
