@@ -4,11 +4,8 @@ Trains and evaluates a binary classifier (group 0 = control, group 1 = target gr
 final model ready for external validation. External validation is in scope: it runs only when
 `validation_input_data` is set (section 5).
 
-The workflow standardizes the features (`StandardScaler`), imputes missing values (`KNNImputer`,
-only when the data has missing values) and trains a classifier of choice: elastic net (logistic
+The workflow standardizes the features, imputes missing values, and trains a classifier of choice: elastic net (logistic
 regression) or XGBoost. It runs locally in Docker.
-
-Out of scope: workflow orchestrators, batch correction, and use of metadata.
 
 ## Repository contents
 
@@ -59,7 +56,7 @@ Each stage writes its checkpoint to disk before the next one starts.
 | `01_qc/` | Data summary, feature filter table, removed features, train and test ID lists |
 | `02_tuning/` | `cv_results.csv` (every combination and fold), `best_params.json`, `evaluation_model.joblib`, `transformed_samples.csv` (samples after scaling and imputation) |
 | `03_final_model/` | Metrics, confusion matrices, predictions, ROC and confusion-matrix figures, `evaluation_model.joblib` (copy), `final_model.joblib` (fit on 100% of samples) |
-| `04_interpretation/` | Elastic net: coefficient tables, importance table, lollipop plots. XGBoost: SHAP tables and plots |
+| `04_interpretation/` | Elastic net: coefficient tables, feature importance. XGBoost: SHAP tables and plots |
 | `05_validation/` | Only if `validation_input_data` is set: metrics, confusion matrix, predictions, ROC and confusion-matrix figures, validation data QC, transformed validation samples and feature interpretation (`interpretation/`) |
 | root | `params_used.yaml` (configuration with defaults filled in), `run_info.json` (seed, versions, date, input hash) |
 
